@@ -9,5 +9,10 @@ version = "0.1.0"
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
+    "-s",
+    "-v",
+    # disable the warnings plugin, note to judge yourself to enable/disable it.
+    "-p no:warnings",
+    "--log-cli-level=INFO"
 ]
 pythonpath="src"
