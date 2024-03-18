@@ -1,4 +1,4 @@
-from zhihu.prompt.mobile_assistant.prompt_text import ROLE, INSTRUCTION, EXAMPLES, OUTPUT_FORMAT
+from zhihu.prompt.prompt_text import ROLE, INSTRUCTION, EXAMPLES, OUTPUT_FORMAT
 from zhihu.common.api import get_completion
 
 CONTEXT_EXAMPLES=f"""
@@ -7,28 +7,28 @@ CONTEXT_EXAMPLES=f"""
 客服：有什么可以帮您
 用户：100G套餐有什么
 
-{{"data":{{"operator":">=","value":100}}}}
+{{"month_data":{{"operator":">=","value":100}}}}
 
 客服：有什么可以帮您
 用户：100G以上的套餐有什么
 客服：我们现在有无限套餐，不限流量，月费300元
 用户：太贵了，有200元以内的不
 
-{{"data":{{"operator":">=","value":100}},"price":{{"operator":"<=","value":200}}}}
+{{"month_data":{{"operator":">=","value":100}},"month_price":{{"operator":"<=","value":200}}}}
 
 客服：有什么可以帮您
 用户：便宜的套餐有什么
 客服：我们现在有经济套餐，每月50元，10G流量
 用户：100G以上的有什么
 
-{{"data":{{"operator":">=","value":100}},"sort":{{"ordering": "ascend","value"="price"}}}}
+{{"month_data":{{"operator":">=","value":100}},"sort":{{"ordering": "ascend","value"="month_price"}}}}
 
 客服：有什么可以帮您
 用户：100G以上的套餐有什么
 客服：我们现在有畅游套餐，流量100G，月费180元
 用户：流量最多的呢
 
-{{"sort":{{"ordering": "descend","value"="data"}},"data":{{"operator":">=","value":100}}}}
+{{"sort":{{"ordering": "descend","value"="month_data"}},"month_data":{{"operator":">=","value":100}}}}
 
 """
 

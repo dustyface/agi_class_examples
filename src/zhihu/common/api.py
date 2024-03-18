@@ -42,19 +42,20 @@ def reset_session_message():
 
 # 和LLM的会话
 def get_completion(prompt, /, model="gpt-3.5-turbo", temperature=0, *, system_prompt:str=None, messages: list[object]=None, clear_session:bool=True,  **kwargs):
+    global _session_messages
     args = {}
     messages = _session_messages if messages is None else messages
     if system_prompt is not None and len(messages) >= 1:
         raise ValueError("system_prompt should not be set, when messages is not empty")
-    messages = set_system_prompt(system_prompt) if system_prompt is str and len(messages) == 0 else messages
-    messages.append({
+    _session_messages = set_system_prompt(system_prompt) if system_prompt is str and len(messages) == 0 else messages
+    _session_messages.append({
         "role": "user",
         "content": prompt
     })
     args = {k: v for k, v in kwargs.items() if v is not None}
     args['model'] = model
     args['temperature'] = temperature
-    args['messages'] = messages
+    args['messages'] = _session_messages
     logger.debug("get_completion args=%s", args)
     rsp = client.chat.completions.create(**args)
     logger.debug("get_completion response=%s", rsp)

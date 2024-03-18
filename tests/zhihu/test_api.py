@@ -6,8 +6,11 @@ logger = logging.getLogger(__name__)
 
 def test_set_system_prompt():
     sys_msg = set_system_prompt("你叫瓜瓜, 你是一个讲笑话的专家")
-    assert isinstance(sys_msg, list)
-    
+    logger.info("sys_msg=%s", sys_msg)
+    assert sys_msg == get_session_messages()
+    assert sys_msg[0]["role"] == "system"
+
+
 def test_get_completion():
     # 测试基本功能
     rsp = get_completion("讲一个10个字以内的笑话")

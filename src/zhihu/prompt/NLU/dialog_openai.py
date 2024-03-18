@@ -14,7 +14,7 @@ system_prompt = """
 校园套餐，月费150元，200G流量，仅限在校生
 """
 
-# 这个直接和LLM对话, 创造了一个手机流量客服套餐助手的情景
+# 这个例子, 创造了一个手机流量客服套餐助手的情景, 直接和LLM对话, 
 # 从输出可以看出, 这种prompt控制方式和LLM的交互，LLM的回复的内容随机性是非常大的, 在和client端的交互可控性比较差
 def multiround_conversation():
     set_system_prompt(system_prompt)

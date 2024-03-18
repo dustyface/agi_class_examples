@@ -8,7 +8,7 @@ rsp = get_completion("讲一个10个字以内的笑话")
 
 ```
 
-- 可以发起和LLM的多轮对话，同时可以设定message role为system的prompt
+- 可以发起和LLM的多轮对话，同时可以设定message role为system的prompt, 在消息中可以保留之前的会话消息
 ```python
 # 可以预先设定system prompt，设定之后的调用get_completion(), 就自动含有该system prompt
 set_system_prompt("你是一个说唱歌手.")
@@ -30,4 +30,4 @@ logger.info("rsp=%$", rsp.choices[0].message.content)
 <div>
     ![error](../images/need_reset_msg.png)
 </div>
-    + 上图是没有清除session_message时, 设定system_prompt报错
+    + 上图是由于没有清除session_message时, 设定system_prompt报错
