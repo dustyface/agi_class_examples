@@ -1,5 +1,5 @@
 from zhihu.prompt.prompt_text import ROLE, INSTRUCTION, EXAMPLES, OUTPUT_FORMAT
-from zhihu.common.api import get_completion
+from zhihu.common.api import Session
 
 CONTEXT_EXAMPLES=f"""
 {EXAMPLES}
@@ -53,10 +53,11 @@ PROMPT_TEMPLATE = f"""
 def simple_conversation():
     robot_emoji = "\U0001F916"
     user_emoji = "\U0001F42E"
+    session = Session()
     user_input = input(f"\n{robot_emoji}: 你好, 请回答你的办卡需求, 我可以帮你选择合适的套餐\n{user_emoji}: ")
     context = CONTEXT.format(user_input=user_input)
     prompt = PROMPT_TEMPLATE + "\n\n" + context
-    return get_completion(prompt)
+    return session.get_completion(prompt)
 
 # print(simple_conversation().choices[0].message.content)
 

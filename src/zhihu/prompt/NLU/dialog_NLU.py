@@ -191,7 +191,7 @@ class DialogManager:
         prompt = self._wrap(user_input, records)
         response = self.get_completion(prompt)
         # 更新 self.session status
-        add_message_to_session("assistant", response)
+        add_message_to_session(role="assistant", content=response)
         self.session = get_session_messages()
         return response
 
