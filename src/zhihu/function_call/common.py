@@ -24,26 +24,28 @@ def function_calling_cb(session, message, module_name:str, *callbacks):
         if len(callbacks) == 0:
             raise ValueError("You should at least provide one callback function name")
         fn_name = tool_call.function.name
-        logger.debug("fn_name=%s", fn_name)
+        logger.info("fn_name=%s", fn_name)
         if len(callbacks) > 0 and fn_name not in callbacks:
             continue
         fn_args = json.loads(tool_call.function.arguments)
-        logger.debug("fn_args=%s", fn_args)
+        logger.info("fn_args=%s", fn_args)
         module = sys.modules[module_name]
         callback = getattr(module, fn_name)
         if callback:
             result = callback(**fn_args)
             logger.info("callback result=%s", result)
-            session.add_message(message={
+            assist_msg = {
                 "tool_call_id": tool_call.id,
                 "role": "tool",
                 "name": fn_name,
                 "content": str(result)
-            })
+            }
+            session.add_message(message=assist_msg)
     rsp = session.get_completion(
         model=model_func_call,
         temperature=0.7,
-        seed=1024
+        seed=1024,
+        clear_session=False
     )
     return rsp
 

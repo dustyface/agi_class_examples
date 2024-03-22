@@ -17,6 +17,7 @@ def collect_stream(response):
         elif delta.content:
             text += delta.content
             sys.stdout.write(delta.content)
+    # 注意, connet stream to stdout, use sys.stdout.write() instead of print()
     sys.stdout.write("\n")
     sys.stdout.flush()
     return function_name, args, text

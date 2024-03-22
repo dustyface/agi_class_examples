@@ -4,6 +4,7 @@ import logging
 import requests
 from zhihu.function_call.common import make_func_tool, model_func_call, function_calling_cb
 from zhihu.common.api import Session
+from zhihu.common.util import print_json
 
 _ = load_dotenv(find_dotenv())
 amap_key = os.getenv("AMAP_KEY")
@@ -54,9 +55,15 @@ def function_call_geo(prompt:str):
     session = Session(system_prompt="你是一个地图通，你可以找到任何地址")
     rsp = session.get_completion(prompt, tools=tools, model=model_func_call, seed=1024, clear_session=False)
     message_assistant = rsp.choices[0].message
-    session.add_message(message=message_assistant)
-
     logger.info("message_assistant=%s", message_assistant)
 
-    return function_calling_cb(session, message_assistant, __name__,  "get_location_coordinate", "search_nearby_pois")
+    while message_assistant.tool_calls is not None:
+        rsp = function_calling_cb(session, message_assistant, __name__,  "get_location_coordinate", "search_nearby_pois")
+        if rsp.choices is not None:
+            message_assistant = rsp.choices[0].message
+        else:
+            break
+    
+    logger.info("session message:\n\n%s", session.get_session_messages())
+    return message_assistant
 

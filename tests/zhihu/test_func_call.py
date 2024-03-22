@@ -56,12 +56,13 @@ def test_func_call_eval():
 def test_func_call_geo():
     prompts = [
         "我想在北京五道口附近喝咖啡，给我推荐几个",
-        "我想去小汤山泡温泉，告诉我怎么走",
-        "我想去天坛附近，喝豆汁吃北京小吃, 给我推荐几个地方"
+        # "我想去小汤山泡温泉，告诉我怎么走",
+        # "我想去天坛附近，喝豆汁吃北京小吃, 给我推荐几个地方"
     ]
     for p in prompts:
-        rsp = function_call_geo(p)
-        logger.info("rsp=%s", rsp.choices[0].message.content)
+        final_message = function_call_geo(p)
+        logger.info("final message=%s", final_message)
+        print(final_message.content)
 
 def test_func_call_json():
     prompts = ["帮我寄给王卓然，地址是北京市朝阳区亮马桥外交办公大楼，电话13012345678。"]
