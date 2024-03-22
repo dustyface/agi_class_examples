@@ -4,7 +4,9 @@ from zhihu.function_call.sum import function_call_sum
 from zhihu.function_call.eval import function_call_eval 
 from zhihu.function_call.geo import function_call_geo
 from zhihu.function_call.json import function_call_json
-from zhihu.function_call.dbquery import analyze_order_table
+from zhihu.function_call.query import analyze 
+from zhihu.function_call.multi_table_query import analyze as multi_table_analyze
+from zhihu.function_call.stream import stream_func_call
 import logging
 
 logger = logging.getLogger(__name__)
@@ -80,5 +82,26 @@ def test_func_call_dbquery():
         "统计10月份每件商品的销售额"
     ]
     for p in prompts:
-        rsp = analyze_order_table(p, "你是一个数据分析师，你可以查询数据库, 请基于order表回答用户问题")
+        rsp = analyze(p, "你是一个数据分析师，你可以查询数据库, 请基于order表回答用户问题")
         logger.info("rsp=%s", rsp.choices[0].message.content)
+
+def test_func_call_multitable_query():
+    system_prompt = "你是一个数据分析师，你可以查询数据库, 请基于order, product, customer等表回答用户问题"
+    prompts = [
+        "统计每月每件商品的销售额",
+        "这星期消费最高的用户是谁? 他买了哪些商品？",
+    ]
+    for p in prompts:
+        rsp = multi_table_analyze(p, system_prompt)
+        if rsp:
+            logger.info("rsp=%s", rsp.choices[0].message.content)
+
+
+def test_stream_func_call():
+    prompts = [
+        "1+2+3",
+        "你是谁"
+    ]
+    for p in prompts:
+        fn, args, text = stream_func_call(p)
+        logger.info("fn=%s, args=%s, text=%s", fn, args, text)

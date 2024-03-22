@@ -22,13 +22,14 @@ class Session:
             raise ValueError("Check your messages and system_prompt status, you should use either one to start a new session.")
         self.system_prompt = system_prompt
         self._session_message = messages if messages is not None else []
-        if self.system_prompt is not None:
-            self.add_message(role="system", content=self.system_prompt)
-    
+        self.set_system_prompt(self.system_prompt)
+   
     def set_system_prompt(self, prompt:str)->list[dict]:
         if len(self._session_message) > 0:
             raise ValueError("When setting system_prompt, session_messages should be empty")
-        return self.add_message(role="system", content=prompt)
+        if prompt is not None:
+            self.add_message(role="system", content=prompt)
+        return self._session_message
         
     def add_message(self, *, role:str=None, content:str=None, message=None):
         if message is not None and (role is not None or content is not None):

@@ -2,6 +2,7 @@ import json
 import sqlite3
 import sys
 import logging
+from zhihu.common.api import Session
 from zhihu.common.util import print_json
 
 logger = logging.getLogger(__name__)
@@ -79,7 +80,7 @@ def make_func_tool(name: str, description:str, /, properties: dict, required:lis
 
 # The base class for database operations
 class DB:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.conn = sqlite3.connect(':memory')
         self.cursor = self.conn.cursor()
     
@@ -91,3 +92,45 @@ class DB:
     def __del__(self):
         self.cursor.close()
         self.conn.close()
+    
+class DBAnalyzer:
+    def __init__(self, *args, **kwargs):
+        database_schema_string = kwargs.get("database_schema_string")
+        print("DBAnalyzer init; database_schema_string=", database_schema_string)
+        self.database_schema_string = database_schema_string
+    
+    def analyze(self, prompt:str, system_prompt:str, *, caller_module_name:str=None):
+        session = Session()
+        session.set_system_prompt(system_prompt)
+        tools = [
+            make_func_tool(
+                "exec_query",
+                "This is function is to answer user requirement about business. The output should be a fully formed SQL query statement.",
+                {
+                    "query": """
+                    SQL query extracting information to answer user's question.
+                    SQL should be written using this database schema:
+                    {database_schema_string}
+                    The query should be returned in plain text, not in JSON.
+                    The query should only contain grammars supported by SQLite.
+                    """.format(database_schema_string=self.database_schema_string)
+                },
+                required=["query"]
+            )
+        ]
+        rsp = session.get_completion(
+            prompt,
+            model=model_func_call,
+            tools=tools,
+            seed=1024,
+            clear_session=False
+        )
+        message = rsp.choices[0].message
+        logger.info("assistant message=%s", message)
+        return function_calling_cb(
+            session,
+            message,
+            caller_module_name if caller_module_name is not None else __name__,
+            "exec_query"
+        )
+        

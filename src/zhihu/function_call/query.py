@@ -1,12 +1,12 @@
 # 参考：
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_with_chat_models.ipynb
 from zhihu.common.api import Session
-from zhihu.function_call.common import model_func_call, make_func_tool, function_calling_cb, DB
+from zhihu.function_call.common import model_func_call, make_func_tool, function_calling_cb, DB, DBAnalyzer
 import logging
 
 logger = logging.getLogger(__name__)
 
-class Order(DB):
+class Order(DB, DBAnalyzer):
     tbl_exists = "SELECT name FROM sqlite_master WHERE type='table' AND name='{tbl_name}'"
     create_tbl_orders = """
     CREATE TABLE orders (
@@ -34,7 +34,8 @@ class Order(DB):
         return cls._instance
 
     def __init__(self):
-        super().__init__()
+        self.database_schema_string = self.create_tbl_orders
+        super().__init__(self, database_schema_string=self.create_tbl_orders)
         # create the order table
         self.cursor.execute(self.tbl_exists.format(tbl_name="orders"))
         table_exists = self.cursor.fetchone() is not None
@@ -59,41 +60,10 @@ class Order(DB):
 
 
 def exec_query(**args):
-    logger.info("query=\033[34m%s\033[0m", args["query"])
+    logger.info("query=\n\n\033[34m%s\033[0m\n\n", args["query"])
     order_tbl = Order()
     return order_tbl.exec_query(args["query"])
 
-def analyze_order_table(prompt: str, system_prompt:str) -> str:
-    order_tbl = Order()
-    session = Session(system_prompt=system_prompt)
-    tools = [
-        make_func_tool(
-            "exec_query", 
-            "This is function is to answer user requirement about business. The output should be a fully formed SQL query statement.", 
-            {
-                "query": """
-                SQL query extracting information to answer user's question.
-                SQL should be written using this database schema:
-                {database_schema_string}
-                The query should be returned in plain text, not in JSON.
-                The query should only contain grammars supported by SQLite.
-                """.format(database_schema_string=order_tbl.create_tbl_orders)
-            },
-            required=["query"]
-        )
-    ]
-    rsp = session.get_completion(
-        prompt,
-        model=model_func_call,
-        tools=tools,
-        seed=1024,
-        clear_session=False
-    )
-    message_assistant = rsp.choices[0].message
-    logger.info("message_assistant=%s", message_assistant)
-
-    rsp = function_calling_cb(session, message_assistant, __name__, "exec_query")
-    if rsp:
-        logger.info("final result=%s", rsp)
-    return rsp
-
+def analyze(prompt, system_prompt):
+    order = Order()
+    return order.analyze(prompt, system_prompt, caller_module_name=__name__)

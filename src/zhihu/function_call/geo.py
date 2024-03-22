@@ -1,6 +1,5 @@
 from dotenv import load_dotenv, find_dotenv
 import os
-import sys
 import logging
 import requests
 from zhihu.function_call.common import make_func_tool, model_func_call, function_calling_cb

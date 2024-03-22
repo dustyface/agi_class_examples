@@ -1,7 +1,10 @@
-from zhihu.function_call.common import DB
+from zhihu.function_call.common import DB, DBAnalyzer
 from zhihu.function_call.query import Order
+import logging
 
-class MultiTable(DB):
+logger = logging.getLogger(__name__)
+
+class MultiTable(DB, DBAnalyzer):
     tbl_exists = "SELECT name FROM sqlite_master WHERE type='table' AND name='{tbl_name}'"
     create_tbl_customers = """
     CREATE TABLE customers (
@@ -47,13 +50,14 @@ class MultiTable(DB):
             cls._instance = super(MultiTable, cls).__new__(cls, *args, **kwargs)
         return cls._instance
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        self.database_schema_string = self.create_tbl_customers + self.create_tbl_products + self.create_tbl_orders
+        super().__init__(self, database_schema_string=self.database_schema_string)
         for name in ["customers", "products", "orders"]:
-           if not self._tbl_exist(name):
+            if not self._tbl_exist(name):
                 self._create_tbl(name)
                 self._insert_data(name)
-        self.conn.commit()
+            self.conn.commit()
     
     def __del__(self):
         self._drop_tables(["customers", "products", "orders"])
@@ -76,3 +80,12 @@ class MultiTable(DB):
         for name in names:
             if self._tbl_exist(name):
                 self.cursor.execute(f"DROP TABLE {name}")
+
+def exec_query(**args):
+    logger.info("query=\n\n\033[34m%s\033[0m\n\n", args["query"])
+    multi_table = MultiTable()
+    return multi_table.exec_query(args["query"])
+
+def analyze(prompt, system_prompt):
+    multi_table = MultiTable()
+    return multi_table.analyze(prompt, system_prompt, caller_module_name=__name__)
