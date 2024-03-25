@@ -1,9 +1,14 @@
 import logging
-import zhihu.common.api as api
 # from zhihu.common.api import set_system_prompt, get_completion, get_session_messages, reset_session_message, add_message_to_session
-from zhihu.common.api import Session
+from zhihu.common.api import Session, client
 
 logger = logging.getLogger(__name__)
+
+def test_model_list():
+    model_list = client.models.list()
+    for m in model_list:
+        logger.info("model=%s", m.id)
+
 
 def test_set_system_prompt():
     session = Session()

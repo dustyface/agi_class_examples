@@ -1,0 +1,5 @@
+pdfminer.six
+chromadb
+nltk
+elasticsearch7
+sentence_transformers
