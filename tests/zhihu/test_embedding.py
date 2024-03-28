@@ -1,14 +1,16 @@
 from zhihu.RAG.vectordb.embeddings import get_embeddings, cos_sim, l2
+from zhihu.RAG.baidu.embeddings import get_embeddings as get_embeddings_ernie
 import logging
 
 logger = logging.getLogger(__name__)
 
+texts = [
+    "测试文本",
+    "北京的天气怎么样?",
+    "上海的生煎特别好吃, 我很久没有吃到地道的上海生煎了"
+]
+
 def test_embeddings():
-    texts = [
-        "测试文本",
-        "北京的天气怎么样?",
-        "上海的生煎特别好吃, 我很久没有吃到地道的上海生煎了"
-    ]
     vectors = get_embeddings(texts)
     # 可以看到，不同长度的文本，返回的embedding的长度是一样的，model text-embedding-ada-002的维度是1536 
     for embedding in vectors:
@@ -32,4 +34,8 @@ def test_comparison_embeddings():
     for i, embedding in enumerate(vectors):
         l2_dist = l2(vectors[0], embedding)
         logger.info("l2_dist(text, vectors[%s])=%s", i, l2_dist) 
-    
+
+def test_get_embeddings_ernie():
+    vectors = get_embeddings_ernie(texts)
+    for embedding in vectors:
+        logger.info("embedding=%s, len(embedding)=%s", embedding[0:5], len(embedding))

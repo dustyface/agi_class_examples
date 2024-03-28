@@ -3,15 +3,21 @@ from zhihu.RAG.common import parse_paragraph_from_pdf, parse_paragraph_from_pdf_
 from zhihu.RAG.es.rag_bot import RAG_Bot
 from zhihu.RAG.es.es_wrapper import ESWrapper
 import logging
+from zhihu.common.util import write_log_file
+
 logger = logging.getLogger(__name__)
 
 pdf_file = "src/zhihu/RAG/llama2-test-1-4.pdf"
+
 
 def test_parse_doc_v1():
     paras = parse_paragraph_from_pdf(pdf_file, page_numbers=[0, 1, 2])
     for p in paras[-4:-1]:
         print("\n")
         print(p)
+    logger.info("writing log file %s", "llama2_test")
+    write_log_file("llama2_test", paras) 
+    
 
 # 这两个方法比较，可以看出硬编码parse_paragraph_from_pdf_v2输出的分段结果是不准确的
 def test_parse_doc_v2():
@@ -19,6 +25,7 @@ def test_parse_doc_v2():
     for p in paras[-4:-1]:
         print("\n")
         print(p)
+    write_log_file("llama2_test_v2", paras)
 
 
 def test_es_list_indices():

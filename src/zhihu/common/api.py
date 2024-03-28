@@ -54,12 +54,12 @@ class Session:
         args = {k: v for k, v in kwargs.items() if v is not None}
         args['model'] = model
         args['temperature'] = temperature
-        args['messages'] = self._session_message
         if prompt is not None:
             self.add_message(role="user", content=prompt)
         if len(self._session_message) == 0:
             logger.warn("You should provide at least one message to start a session talk to LLM")
             return
+        args['messages'] = self._session_message
         logger.debug("get_completion args=%s", args)
         rsp = client.chat.completions.create(**args)
         logger.debug("get_completion response=%s", rsp)

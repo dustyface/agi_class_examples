@@ -5,4 +5,5 @@ chromadb
 nltk
 elasticsearch7
 sentence_transformers
+qianfan
 pytest
