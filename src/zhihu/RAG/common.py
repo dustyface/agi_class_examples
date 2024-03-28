@@ -1,5 +1,6 @@
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer
+from nltk.tokenize import sent_tokenize
 
 from zhihu.common.util import write_log_file
 
@@ -47,3 +48,30 @@ def parse_paragraph_from_pdf_v2(in_file, page_numbers:list[int]=None):
     paras = parse_paragraph_from_pdf(in_file, page_numbers, sep="\n")
     write_log_file("lines_1", paras)
     return _split_paragraph_by_lastline_length(paras, last_line_length=5)
+
+
+def cascade_split_text(paragraph, chunk_size=300, overlap_size=100):
+    """
+    将paragraph按照chunk_size进行切分，每个chunk之间有overlap_size的重叠
+    不再按paragraph去组织文本，而是打散成按句子组织的粒度，而且每个句子之前之后，加上一段重叠的文本
+    """
+    sentence = [s.strip() for p in paragraph for s in sent_tokenize(p)]
+    chunks = []
+    i = 0
+    while i < len(sentence):
+        chunk = sentence[i]
+        overlap = ""
+        prev = i - 1
+        while prev >= 0 and len(sentence[prev]) + len(overlap) <= overlap_size:
+            overlap = sentence[prev] + " " + overlap
+            prev -= 1
+        chunk = overlap + chunk
+        next = i + 1
+        while next < len(sentence) and len(chunk) + len(sentence[next]) < chunk_size:
+            chunk += " " + sentence[next]
+            next += 1
+        
+        chunks.append(chunk)
+        i = next    # i设定为已添加完next的句子的下一个位置
+    return chunks
+

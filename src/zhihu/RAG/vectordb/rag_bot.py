@@ -4,6 +4,7 @@ from zhihu.RAG.vectordb.embeddings import get_embeddings
 from zhihu.common.api import Session
 from zhihu.RAG.common import parse_paragraph_from_pdf
 from zhihu.RAG.prompt import build_prompt, prompt_template
+from zhihu.RAG.common import cascade_split_text
 
 
 class RAG_Bot:
@@ -36,3 +37,10 @@ class RAG_Bot:
             query=user_query)
         print("user_query=", user_query, "\nprompt=", prompt)
         return self.session.get_completion(prompt)
+
+class RAG_Bot_with_CascadeDocParser(RAG_Bot):
+    def _parse_document(self, in_file, *, page_numbers=None):
+        paras = super()._parse_document(in_file, page_numbers=page_numbers)
+        return cascade_split_text(paras)
+    
+    
