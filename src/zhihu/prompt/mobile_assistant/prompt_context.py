@@ -1,5 +1,6 @@
-from zhihu.prompt.prompt_text import ROLE, INSTRUCTION, EXAMPLES, OUTPUT_FORMAT
+""" Prompt for mobile assistant conversation """
 from zhihu.common.api import Session
+from zhihu.prompt.prompt_text import ROLE, INSTRUCTION, EXAMPLES, OUTPUT_FORMAT
 
 CONTEXT_EXAMPLES=f"""
 {EXAMPLES}
@@ -51,6 +52,7 @@ PROMPT_TEMPLATE = f"""
 """
 
 def simple_conversation():
+    "A simple conversation with LLM"
     robot_emoji = "\U0001F916"
     user_emoji = "\U0001F42E"
     session = Session()
@@ -60,5 +62,3 @@ def simple_conversation():
     return session.get_completion(prompt)
 
 # print(simple_conversation().choices[0].message.content)
-
-

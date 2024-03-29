@@ -1,35 +1,43 @@
-from dotenv import load_dotenv, find_dotenv
+""" Functoin calling example for invoking GAODE's geo API """
 import os
 import logging
 import requests
-from zhihu.function_call.common import make_func_tool, model_func_call, function_calling_cb
+from dotenv import load_dotenv, find_dotenv
+from zhihu.function_call.common import make_func_tool, MODEL_FUNC_CALL, function_calling_cb
 from zhihu.common.api import Session
-from zhihu.common.util import print_json
 
 _ = load_dotenv(find_dotenv())
 amap_key = os.getenv("AMAP_KEY")
 
 logger = logging.getLogger(__name__)
 
+
 def get_location_coordinate(location="中国", city="北京"):
+    """ GAODE API to get the location coordinate """
     print("get_location_coordinate()=", location, city, amap_key)
     if amap_key is None:
         raise ValueError("AMAP_KEY is not set")
-    api_url = f"https://restapi.amap.com/v5/place/text?key={amap_key}&keywords={location}&region={city}"
+    api_url = f"""
+        https://restapi.amap.com/v5/place/text?key={amap_key}&keywords={location}&region={city}
+        """
     print("amap api_url=", api_url)
-    r = requests.get(api_url)
+    r = requests.get(api_url, timeout=10)  # Added timeout argument
     result = r.json()
     if "pois" in result and result["pois"]:
         return result["pois"][0]
     return None
 
+
 def search_nearby_pois(longitude, latitude, keyword):
+    """ GAODE API to search nearby POIs """
     print("search_nearby_pois()=", longitude, latitude, keyword, amap_key)
     if amap_key is None:
         raise ValueError("AMAP_KEY is not set")
-    api_url = f"https://restapi.amap.com/v5/place/around?key={amap_key}&keywords={keyword}&location={longitude},{latitude}"
+    api_url = f"""
+        https://restapi.amap.com/v5/place/around?key={amap_key}&keywords={keyword}&location={longitude},{latitude}
+        """
     print("amap api_url=", api_url)
-    r = requests.get(api_url)
+    r = requests.get(api_url, timeout=10)
     result = r.json()
     ans = ""
     if "pois" in result and result["pois"]:
@@ -40,7 +48,9 @@ def search_nearby_pois(longitude, latitude, keyword):
             ans += f"{name}\n{address}\n距离: {distance}米\n\n"
     return ans
 
-def function_call_geo(prompt:str):
+
+def function_call_geo(prompt: str):
+    """ Test function calling with GAODE geo API"""
     tools = [
         make_func_tool("search_nearby_pois", "根据给定经纬度坐标，搜索附近的POI", {
             "longitude": "中心点经度",
@@ -53,17 +63,19 @@ def function_call_geo(prompt:str):
         }, required=["location", "city"])
     ]
     session = Session(system_prompt="你是一个地图通，你可以找到任何地址")
-    rsp = session.get_completion(prompt, tools=tools, model=model_func_call, seed=1024, clear_session=False)
+    rsp = session.get_completion(
+        prompt, tools=tools, model=MODEL_FUNC_CALL, seed=1024, clear_session=False)
     message_assistant = rsp.choices[0].message
     logger.info("message_assistant=%s", message_assistant)
 
+    # This is called parallel function calling from OpenAI's doc
     while message_assistant.tool_calls is not None:
-        rsp = function_calling_cb(session, message_assistant, __name__,  "get_location_coordinate", "search_nearby_pois")
+        rsp = function_calling_cb(
+            session, message_assistant, __name__,  "get_location_coordinate", "search_nearby_pois")
         if rsp.choices is not None:
             message_assistant = rsp.choices[0].message
         else:
             break
-    
+
     logger.info("session message:\n\n%s", session.get_session_messages())
     return message_assistant
-

@@ -1,12 +1,14 @@
+""" Function calling example for querying database """
 # 参考：
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_with_chat_models.ipynb
-from zhihu.common.api import Session
-from zhihu.function_call.common import model_func_call, make_func_tool, function_calling_cb, DB, DBAnalyzer
 import logging
+from zhihu.function_call.common import DB, DBAnalyzer
 
 logger = logging.getLogger(__name__)
 
+
 class Order(DB, DBAnalyzer):
+    """ Class for Order table operation """
     tbl_exists = "SELECT name FROM sqlite_master WHERE type='table' AND name='{tbl_name}'"
     create_tbl_orders = """
     CREATE TABLE orders (
@@ -35,7 +37,9 @@ class Order(DB, DBAnalyzer):
 
     def __init__(self):
         self.database_schema_string = self.create_tbl_orders
-        super().__init__(self, database_schema_string=self.create_tbl_orders)
+        DB.__init__(self)
+        DBAnalyzer.__init__(
+            self, database_schema_string=self.create_tbl_orders)
         # create the order table
         self.cursor.execute(self.tbl_exists.format(tbl_name="orders"))
         table_exists = self.cursor.fetchone() is not None
@@ -43,16 +47,21 @@ class Order(DB, DBAnalyzer):
             self._create_order_tbl()
             self._insert_order_tbl()
         self.conn.commit()
-    
+
     def _drop_order_tbl(self):
         self.cursor.execute("DROP TABLE orders")
-    
+
     def _create_order_tbl(self):
         self.cursor.execute(self.create_tbl_orders)
 
     def _insert_order_tbl(self):
         for record in self.mock_data:
-            self.cursor.execute("INSERT INTO orders (id, customer_id, product_id, price, status, create_time, pay_time) VALUES (?,?,?,?,?,?,?)", record)
+            self.cursor.execute(
+                """
+                INSERT INTO orders
+                (id, customer_id, product_id, price,
+                status, create_time, pay_time) VALUES (?,?,?,?,?,?,?)
+                """, record)
 
     def __del__(self):
         self._drop_order_tbl()
@@ -60,10 +69,13 @@ class Order(DB, DBAnalyzer):
 
 
 def exec_query(**args):
+    """ Execute the query and return the result """
     logger.info("query=\n\n\033[34m%s\033[0m\n\n", args["query"])
     order_tbl = Order()
     return order_tbl.exec_query(args["query"])
 
+
 def analyze(prompt, system_prompt):
+    """ Analyze the SQL query"""
     order = Order()
     return order.analyze(prompt, system_prompt, caller_module_name=__name__)

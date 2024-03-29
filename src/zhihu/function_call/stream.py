@@ -1,11 +1,14 @@
-from zhihu.common.api import Session
-from zhihu.function_call.common import model_func_call, make_func_tool
+""" Call the function calling using an option stream """
 import logging
 import sys
+from zhihu.common.api import Session
+from zhihu.function_call.common import MODEL_FUNC_CALL, make_func_tool
 
 logger = logging.getLogger(__name__)
 
+
 def collect_stream(response):
+    """ handling the stream response """
     function_name, args, text = "", "", ""
     for msg in response:
         delta = msg.choices[0].delta
@@ -21,11 +24,12 @@ def collect_stream(response):
     sys.stdout.write("\n")
     sys.stdout.flush()
     return function_name, args, text
-    
+
 
 def stream_func_call(prompt):
+    """ Call the function calling using an option stream """
     session = Session()
-    tools =[
+    tools = [
         make_func_tool("sum", "计算一组数的和", {
             "numbers": {
                 "type": "array",
@@ -37,11 +41,11 @@ def stream_func_call(prompt):
     ]
     rsp = session.get_completion(
         prompt,
-        model=model_func_call,
+        model=MODEL_FUNC_CALL,
         tools=tools,
         temperature=0.7,
         seed=1024,
         stream=True
     )
-    fn_name,args,text = collect_stream(rsp)
+    fn_name, args, text = collect_stream(rsp)
     return fn_name, args, text

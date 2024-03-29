@@ -1,10 +1,13 @@
+""" Using Function Calling to query multi-table database """
+import logging
 from zhihu.function_call.common import DB, DBAnalyzer
 from zhihu.function_call.query import Order
-import logging
 
 logger = logging.getLogger(__name__)
 
+
 class MultiTable(DB, DBAnalyzer):
+    """ Class for multi-table database operation"""
     tbl_exists = "SELECT name FROM sqlite_master WHERE type='table' AND name='{tbl_name}'"
     create_tbl_customers = """
     CREATE TABLE customers (
@@ -47,45 +50,54 @@ class MultiTable(DB, DBAnalyzer):
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(MultiTable, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super(MultiTable, cls).__new__(
+                cls, *args, **kwargs)
         return cls._instance
-    
-    def __init__(self, *args, **kwargs):
-        self.database_schema_string = self.create_tbl_customers + self.create_tbl_products + self.create_tbl_orders
-        super().__init__(self, database_schema_string=self.database_schema_string)
+
+    def __init__(self):
+        self.database_schema_string = self.create_tbl_customers + \
+            self.create_tbl_products + self.create_tbl_orders
+        DB.__init__(self)
+        DBAnalyzer.__init__(
+            self, database_schema_string=self.database_schema_string)
         for name in ["customers", "products", "orders"]:
             if not self._tbl_exist(name):
                 self._create_tbl(name)
                 self._insert_data(name)
             self.conn.commit()
-    
+
     def __del__(self):
-        self._drop_tables(["customers", "products", "orders"])
+        self._drop_tbl(["customers", "products", "orders"])
         super().__del__()
 
     def _tbl_exist(self, name):
         self.cursor.execute(self.tbl_exists.format(tbl_name=name))
         return self.cursor.fetchone() is not None
-    
+
     def _create_tbl(self, name):
         create_tbl_schema = getattr(self, f"create_tbl_{name}")
         self.cursor.execute(create_tbl_schema)
-    
+
     def _insert_data(self, name):
         mock_data = getattr(self, f"mock_data_{name}")
         for record in mock_data:
-            self.cursor.execute(f"INSERT INTO {name} VALUES ({','.join(['?']*len(record))})", record)
-    
+            self.cursor.execute(
+                f"INSERT INTO {name} VALUES ({','.join(['?']*len(record))})", record)
+
     def _drop_tbl(self, names):
         for name in names:
             if self._tbl_exist(name):
                 self.cursor.execute(f"DROP TABLE {name}")
 
+
 def exec_query(**args):
+    """ Execute the query as the Function Calling callback """
     logger.info("query=\n\n\033[34m%s\033[0m\n\n", args["query"])
     multi_table = MultiTable()
     return multi_table.exec_query(args["query"])
 
+
 def analyze(prompt, system_prompt):
+    """ Analyze the SQL query as the Function Calling callback entrypoint """
     multi_table = MultiTable()
     return multi_table.analyze(prompt, system_prompt, caller_module_name=__name__)

@@ -1,5 +1,8 @@
-
-prompt_template = """
+""" 
+This module contains the prompt template and its build_prompt
+for RAG pipeline
+"""
+PROMPT_TEMPLATE = """
 你是一个问答机器人。
 你的任务是根据下述给定的已知信息回答用户问题。
 确保你的回复完全依据下述已知信息。不要编造答案。
@@ -15,6 +18,7 @@ __QUERY__
 """
 
 def build_prompt(prompt, **kwargs):
+    "build the prompt string"
     for k, v in kwargs.items():
         if isinstance(v, str):
             val = v
@@ -24,4 +28,3 @@ def build_prompt(prompt, **kwargs):
             val = str(v)
         prompt = prompt.replace(f"__{k.upper()}__", val)
     return prompt
-    

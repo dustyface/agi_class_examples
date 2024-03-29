@@ -1,28 +1,35 @@
+""" This module provides common functions for function calling """
 import json
 import sqlite3
 import sys
 import logging
 from zhihu.common.api import Session
-from zhihu.common.util import print_json
 
 logger = logging.getLogger(__name__)
 
 # latest model that support function calling well
-model_func_call = "gpt-3.5-turbo-0125"
+MODEL_FUNC_CALL = "gpt-3.5-turbo-0125"
 # gpt-4 is expensive
-# model_func_call = "gpt-4-turbo-preview"
+# MODEL_FUNC_CALL = "gpt-4-turbo-preview"
 
 
-def function_calling_cb(session, message, module_name:str, *callbacks):
+def function_calling_cb(session, message, module_name: str, *callbacks):
+    """ This is the callback for the 2nd round of function calling """
     if message.tool_calls is None:
-        logger.warn("No tool_calls in assistant message, there is no function calling to invoke; message=%s", message)
+        logger.warning(
+            """
+            No tool_calls in assistant message,
+            there is no function calling to invoke; message=%s
+            """,
+            message
+        )
         return
-    
     session.add_message(message=message)
     tool_calls = message.tool_calls
     for tool_call in tool_calls:
         if len(callbacks) == 0:
-            raise ValueError("You should at least provide one callback function name")
+            raise ValueError(
+                "You should at least provide one callback function name")
         fn_name = tool_call.function.name
         logger.info("fn_name=%s", fn_name)
         if len(callbacks) > 0 and fn_name not in callbacks:
@@ -42,14 +49,16 @@ def function_calling_cb(session, message, module_name:str, *callbacks):
             }
             session.add_message(message=assist_msg)
     rsp = session.get_completion(
-        model=model_func_call,
+        model=MODEL_FUNC_CALL,
         temperature=0.7,
         seed=1024,
         clear_session=False
     )
     return rsp
 
-def make_func_tool(name: str, description:str, /, properties: dict, required:list=None) -> dict:
+
+def make_func_tool(name: str, description: str, /, properties: dict, required: list = None) -> dict:
+    """ Return the function calling tool structure """
     tool = {
         "type": "function",
         "function": {
@@ -80,13 +89,16 @@ def make_func_tool(name: str, description:str, /, properties: dict, required:lis
         func["parameters"]["required"] = required
     return tool
 
-# The base class for database operations
+
 class DB:
-    def __init__(self, *args, **kwargs):
+    """ The base class for SQLite DB operations """
+
+    def __init__(self):
         self.conn = sqlite3.connect(':memory')
         self.cursor = self.conn.cursor()
-    
-    def exec_query(self, query:str):
+
+    def exec_query(self, query: str):
+        """ Execute the query and return the result"""
         logger.info("executing query=%s", query)
         self.cursor.execute(query)
         return self.cursor.fetchall()
@@ -94,35 +106,41 @@ class DB:
     def __del__(self):
         self.cursor.close()
         self.conn.close()
-    
+
+
 class DBAnalyzer:
-    def __init__(self, *args, **kwargs):
+    """ The class to analyze the SQL query"""
+
+    def __init__(self, **kwargs):
         database_schema_string = kwargs.get("database_schema_string")
         print("DBAnalyzer init; database_schema_string=", database_schema_string)
         self.database_schema_string = database_schema_string
-    
-    def analyze(self, prompt:str, system_prompt:str, *, caller_module_name:str=None):
+
+    def analyze(self, prompt: str, system_prompt: str, *, caller_module_name: str = None):
+        """ Generate the SQL query by the LLM """
         session = Session()
         session.set_system_prompt(system_prompt)
         tools = [
             make_func_tool(
                 "exec_query",
-                "This is function is to answer user requirement about business. The output should be a fully formed SQL query statement.",
+                """
+                This is function is to answer user requirement about business.
+                The output should be a fully formed SQL query statement.""",
                 {
-                    "query": """
-                    SQL query extracting information to answer user's question.
-                    SQL should be written using this database schema:
-                    {database_schema_string}
-                    The query should be returned in plain text, not in JSON.
-                    The query should only contain grammars supported by SQLite.
-                    """.format(database_schema_string=self.database_schema_string)
+                    "query": f"""
+                        SQL query extracting information to answer user's question.
+                        SQL should be written using this database schema:
+                        {self.database_schema_string}
+                        The query should be returned in plain text, not in JSON.
+                        The query should only contain grammars supported by SQLite.
+                        """
                 },
                 required=["query"]
             )
         ]
         rsp = session.get_completion(
             prompt,
-            model=model_func_call,
+            model=MODEL_FUNC_CALL,
             tools=tools,
             seed=1024,
             clear_session=False
@@ -135,4 +153,3 @@ class DBAnalyzer:
             caller_module_name if caller_module_name is not None else __name__,
             "exec_query"
         )
-        
