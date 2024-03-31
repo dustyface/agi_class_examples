@@ -1,5 +1,5 @@
 
-# README
+# Zhihu Training Campaign Examples
 
 - 这个project是知乎AI训练营的examples。对课件中的例子进行了重构, 全部改为基于pytest unittest的方式进行测试
 
@@ -31,8 +31,9 @@ session.get_completion("请创作一段说唱音乐歌词, 不超过20个字。"
 session_msg = get_session_message()
 assert session_msg[0]['role'] == 'system'
 ```
-    + clear_session 参数：默认情况下, get_completion执行完一次会话，会将_session_message清空, 如果希望进行携带着之前的会话信息，则需要显式的指定clear_sesson False不清空_session_message
-    + 多轮对话sample如下
+
+- clear_session 参数：默认情况下, get_completion执行完一次会话，会将_session_message清空, 如果希望进行携带着之前的会话信息，则需要显式的指定clear_sesson False不清空_session_message
+- 多轮对话sample如下
 
 ```python
 session = Session(system_prompt="你是一个北京市的地理通")

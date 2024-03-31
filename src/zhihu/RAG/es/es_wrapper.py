@@ -1,14 +1,10 @@
 """ Elasticsearch Wrapper """
-import re
 import os
 import warnings
 import logging
 from dotenv import load_dotenv, find_dotenv
 from elasticsearch7 import Elasticsearch, helpers
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-import nltk
+from zhihu.RAG.common import to_keywrod_en
 
 logger = logging.getLogger(__name__)
 
@@ -18,19 +14,18 @@ ES_HOST = f"http://{os.getenv('ZHIHU_ELASTICSEARCH_URL')}"
 ES_PWD = os.getenv("ZHIHU_ELASTICSEARCH_PWD")
 
 warnings.simplefilter("ignore")     # 屏蔽 ES 的一些Warnings
-nltk.download("punkt")              # 英文切词、词根、切句等方法
-nltk.download("stopwords")          # 英文停用词库
 
 
 class ESWrapper:
     """ Elasticsearch Wrapper """
 
-    def __init__(self, *, es_host=ES_HOST, es_pwd=ES_PWD):
+    def __init__(self, *, to_keyword=to_keywrod_en, es_host=ES_HOST, es_pwd=ES_PWD):
         self.es_host = es_host
         self.es_pwd = es_pwd
         self.es = Elasticsearch(
             hosts=[self.es_host], http_auth=("elastic", self.es_pwd))
         self.index_name = None
+        self.to_keyword = to_keyword
 
     def list_all_indices(self):
         """ List all ES indices """
@@ -67,18 +62,6 @@ class ESWrapper:
         # 必须要使用refresh参数, 否则立即进行es search操作得不到搜索的数据
         helpers.bulk(self.es, actions, refresh='wait_for')
 
-    def to_keyword(self, input_string):
-        """ Convert the input string to keywords """
-        # 使用正则表达式替换所有非字母数字的字符为空格
-        no_symblos = re.sub(r"[^a-zA-Z0-9\s]", " ", input_string)
-        word_tokens = word_tokenize(no_symblos)
-        stop_words = set(stopwords.words("english"))
-        ps = PorterStemmer()
-        # 去停用词，取词根
-        filtered_sentence = [
-            ps.stem(w) for w in word_tokens if not w.lower() in stop_words]
-        return " ".join(filtered_sentence)
-
     def search(self, query_string, *, top_n=3):
         """ Search the ES index """
         search_query = {
@@ -86,6 +69,7 @@ class ESWrapper:
                 "keywords": self.to_keyword(query_string)
             }
         }
+        logger.debug("search query=%s", search_query)
         # self.es.search的可接受参数是通过decorator定义的，但pylint无法检测到, 似乎是一个pylint的bug
         # pylint: disable=unexpected-keyword-arg
         res = self.es.search(index=self.index_name,

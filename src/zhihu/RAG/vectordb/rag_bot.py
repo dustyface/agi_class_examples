@@ -25,10 +25,17 @@ class RAGBot:
     def _parse_document(self, in_file, *, page_numbers=None):
         return parse_paragraph_from_pdf(in_file, page_numbers=page_numbers)
 
-    def prepare(self, in_file):
+    def prepare(self, /, in_file=None, *, docs: Union[str, list[str]] = None):
         """加载和拆分文档, 灌入ChromaDB"""
-        paras = self._parse_document(in_file)
-        self.chromadb_wrapper.add_documenet(paras)
+        if in_file is None and docs is None:
+            raise ValueError("prepare(): in_file or docs should be provided.")
+
+        if docs is None:
+            paras = self._parse_document(in_file)
+            self.chromadb_wrapper.add_documenet(paras)
+        elif in_file is None:
+            docs = [docs] if isinstance(docs, str) else docs
+            self.chromadb_wrapper.add_documenet(docs)
 
     # chromadb的search()返回的dict结构如下：
     # { ids: [[], []..., []], distances: [[0.289, 0.31xxx, ...],[],...[]]},
@@ -50,7 +57,10 @@ class RAGBot:
 
 
 class RAGBotWithCascadeDocParser(RAGBot):
-    """ RAG Bot with CascadeDocParser """
+    """ 
+    RAG Bot with CascadeDocParser
+    CascadeDocParser used cascade_split_text to split the document
+    """
 
     def _parse_document(self, in_file, *, page_numbers=None):
         paras = super()._parse_document(in_file, page_numbers=page_numbers)

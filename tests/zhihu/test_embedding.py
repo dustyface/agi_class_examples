@@ -42,6 +42,24 @@ def test_comparison_embeddings():
         logger.info("l2_dist(text, vectors[%s])=%s", i, l2_dist)
 
 
+def test_comparison_embeddings_v2():
+    """ 
+    Test the embeddings for RAG example 6,
+    matching the large, specifical vocab
+    """
+    query = "非小细胞肺癌的患者"
+    documents = [
+        "李某患有肺癌，癌细胞已转移",       # 0.9104978086098463
+        "刘某肺癌I期",                   # 0.8897648918974235
+        "张某经诊断为非小细胞肺癌III期",    # 0.9040803406710728, 这个应该最匹配的，但向量搜索却没有得分最高
+        "小细胞肺癌是肺癌的一种"           # 0.9132102982983269
+    ]
+    vectors = get_embeddings([query] + documents)
+    for i, embedding in enumerate(vectors):
+        cos_sim_distance = cos_sim(vectors[0], embedding)
+        logger.info("cos_sim(text, vectors[%s])=%s", i, cos_sim_distance)
+
+
 def test_get_embeddings_ernie():
     """ Test embeddings for Baidu ERNIE """
     vectors = get_embeddings_ernie(texts)

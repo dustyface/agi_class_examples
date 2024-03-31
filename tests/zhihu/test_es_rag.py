@@ -1,7 +1,7 @@
 
 """ Test RAG pipeline using ES """
 import logging
-from zhihu.RAG.common import parse_paragraph_from_pdf, parse_paragraph_from_pdf_v2
+from zhihu.RAG.common import parse_paragraph_from_pdf, parse_paragraph_from_pdf_v2, to_keyword_cn
 from zhihu.RAG.es.rag_bot import RAGBot
 from zhihu.RAG.es.es_wrapper import ESWrapper
 from zhihu.common.util import write_log_file
@@ -51,6 +51,42 @@ def test_es_search():
     bot.prepare(PDF_FILE)
     search_topic = "how many parameters does llama 2 have?"
     bot.search(search_topic, top_n=5)
+
+
+def test_es_search_parse_result():
+    """ Test ES search and parse result as needed """
+    def parse_search_result(hits):
+        result = [
+            {
+                h["_id"]: {
+                    "text": h["_source"]["text"],
+                    "rank": i
+                }
+            }
+            for i, h in enumerate(hits)
+        ]
+        print("result=", result)
+        for res in result:
+            item = list(res.items())[0]
+            k = item[0]
+            v = item[1]
+            print(f"{k}\t{v['rank']}\t{v['text']}")
+        return result
+
+    documents = [
+        "李某患有肺癌，癌细胞已转移",
+        "刘某肺癌I期",
+        "张某经诊断为非小细胞肺癌III期",
+        "小细胞肺癌是肺癌的一种"
+    ]
+    bot = RAGBot(to_keyword=to_keyword_cn)
+    bot.prepare(docs=documents)
+    search_topic = "非小细胞肺癌的患者"
+    return bot.search(
+        search_topic,
+        top_n=5,
+        parse_search_result=parse_search_result
+    )
 
 
 def test_es_rag_bot():

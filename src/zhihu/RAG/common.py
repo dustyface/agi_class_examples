@@ -1,8 +1,16 @@
 """ This module is the common utility for RAG pipeline"""
+import re
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+import nltk
+import jieba
 from zhihu.common.util import write_log_file
+
+nltk.download("punkt")              # 英文切词、词根、切句等方法
+nltk.download("stopwords")          # 英文停用词库
 
 # extracting test from pdf, reference:
 # - extract text sample: https://pdfminersix.readthedocs.io/en/latest/tutorial/extract_pages.html
@@ -86,3 +94,47 @@ def cascade_split_text(paragraph, chunk_size=300, overlap_size=100):
         chunks.append(chunk)
         i = next_pos    # i设定为已添加完next_pos的句子的下一个位置
     return chunks
+
+
+def to_keywrod_en(input_string):
+    """ Convert the input string to keywords """
+    # 使用正则表达式替换所有非字母数字的字符为空格
+    no_symblos = re.sub(r"[^a-zA-Z0-9\s]", " ", input_string)
+    word_tokens = word_tokenize(no_symblos)
+    stop_words = set(stopwords.words("english"))
+    ps = PorterStemmer()
+    # 去停用词，取词根
+    filtered_sentence = [
+        ps.stem(w) for w in word_tokens if not w.lower() in stop_words]
+    return " ".join(filtered_sentence)
+
+
+def to_keyword_cn(input_string):
+    """ 将句子转成检索关键词序列 """
+    # 按搜索引擎模式分词
+    word_tokens = jieba.cut_for_search(input_string)
+    # 加载停用词表
+    stop_words = set(stopwords.words("chinese"))
+    # 去除停用词
+    filtered_sentence = [w for w in word_tokens if not w in stop_words]
+    return " ".join(filtered_sentence)
+
+
+def sent_tokenize_cn(input_string):
+    """按标点断句"""
+    # 按标点切分
+    sentences = re.split(r'(?<=[。！？；?!])', input_string)
+    # 去掉空字符串
+    return [sentence for sentence in sentences if sentence.strip()]
+
+
+def rrf(ranks, k=1):
+    """ 混合检索, 基于倒数排序的融合算法 """
+    ret = dict()
+    for rank in ranks:
+        for _id, val in rank.items():
+            if id not in ret:
+                ret[_id] = {"score": 0, "text": val["text"]}
+            # 计算rrf公式的单项的值
+            ret[_id]["score"] = 1.0/(k + val["rank"])
+    return dict(sorted(ret.items(), key=lambda x: x[1]["score"], reverse=True))

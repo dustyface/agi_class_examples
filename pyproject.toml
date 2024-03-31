@@ -8,12 +8,14 @@ version = "0.1.0"
 
 [tool.pytest.ini_options]
 addopts = [
-    "--import-mode=importlib",
+    # see: https://docs.pytest.org/en/8.0.x/explanation/goodpractices.html#choosing-an-import-mode
+    # Must be clear about --import-mode's prepend and importlib's difference
+    "--import-mode=prepend",
     "-s",
     "-v",
     # disable the warnings plugin, note to judge yourself to enable/disable it.
     "-p no:warnings",
-    "--log-cli-level=INFO"
-    # "--log-cli-level=DEBUG"
+    # "--log-cli-level=INFO"
+    "--log-cli-level=DEBUG"
 ]
 pythonpath="src"
