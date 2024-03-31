@@ -57,7 +57,7 @@ class ESWrapper:
             }
             for para in paragraphs
         ]
-        # 注意: 有关bulk refresh参数
+        # important note: 有关bulk refresh参数
         # https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-refresh.html
         # 必须要使用refresh参数, 否则立即进行es search操作得不到搜索的数据
         helpers.bulk(self.es, actions, refresh='wait_for')

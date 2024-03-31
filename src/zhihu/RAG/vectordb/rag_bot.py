@@ -13,7 +13,7 @@ from zhihu.RAG.prompt import build_prompt, PROMPT_TEMPLATE
 
 
 class RAGBot:
-    """ The RAG Pipeline Class"""
+    """ The RAG Pipeline Class, using chromadb vector DB"""
     prompt_template = PROMPT_TEMPLATE
 
     def __init__(self, bot_name: str, *, _prompt_template=None):
