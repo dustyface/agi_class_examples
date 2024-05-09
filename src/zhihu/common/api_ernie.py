@@ -1,4 +1,4 @@
-""" 
+"""
 Use Baidu's API & SDK for interating with ERNIE model
 
 You need put these 2 keys in your .env file:
@@ -73,9 +73,9 @@ class Session:
                 "You should provide at least one message to start a session talk to LLM")
             return
         args["messages"] = self._session_message
-        logger.debug("chat.do args=%s", args)
+        logger.debug("Erniebot chat.do args=%s", args)
         rsp = chat_comp.do(**args)
-        logger.debug("chat do response=%s", rsp)
+        logger.debug("Erniebot chat.do response=%s", rsp)
         if clear_session:
             self.reset_session_message()
         return rsp

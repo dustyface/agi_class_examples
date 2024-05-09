@@ -1,5 +1,5 @@
 python-dotenv
-metagpt==0.7.4
+# metagpt==0.7.4
 pdfminer.six
 chromadb
 nltk
@@ -7,3 +7,4 @@ elasticsearch7
 sentence_transformers
 qianfan
 pytest
+langchain

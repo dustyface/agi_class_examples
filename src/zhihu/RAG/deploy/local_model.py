@@ -12,6 +12,13 @@ if MODEL_CACHED_DIR is None:
     raise ValueError("请配置环境变量 MODEL_CACHED_DIR")
 logger.info("MODEL_CACHED_DIR=%s", MODEL_CACHED_DIR)
 
+# 执行这个测试，会导致下载模型, 由于huggingface被墙，如果没有梯子的情况下
+# 可以从如下链接下载model, 使用cache_folder参数指定下载的模型路径
+# 链接: https://pan.baidu.com/s/1X0kfNKasvWqCLUEEyAvO-Q?pwd=3v6y 提取码: 3v6y
+# 目前包含 models:
+# cross-encoder/ms-marco-MiniLM-L-6-v2, 参考 RAGBotwithCrossEncoder class
+# BAAI/bge-large-zh-v1.5
+
 # 可以支持中英文
 EMBEDDING_MODEL = "moka-ai/m3e-base"
 # 可以支持中文
