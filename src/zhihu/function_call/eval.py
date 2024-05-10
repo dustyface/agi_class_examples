@@ -23,7 +23,9 @@ def function_call_eval(user_query: str):
     """ Test function calling with eval"""
     tools = [make_func_tool("calculate", "计算一个数学表达式的值",
                             {
-                                "expression": "a mathmatical expression strictly in a valid python grammar syntax"
+                                "expression": """
+                                a mathmatical expression strictly in a valid python grammar syntax
+                                """
                             })]
     session = Session(system_prompt="你是一个数学家，你可以计算任何算式")
     rsp = session.get_completion(
