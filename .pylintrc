@@ -2,4 +2,4 @@
 init-hook='import sys; sys.path.append("src")'
 
 [MESSAGES CONTROL]
-disable=broad-exception-caught
+disable=broad-exception-caught, no-self-argument, unsupported-binary-operation

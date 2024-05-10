@@ -15,7 +15,7 @@ addopts = [
     "-v",
     # disable the warnings plugin, note to judge yourself to enable/disable it.
     "-p no:warnings",
-    # "--log-cli-level=INFO"
-    "--log-cli-level=DEBUG"
+    "--log-cli-level=INFO"
+    # "--log-cli-level=DEBUG"
 ]
 pythonpath="src"

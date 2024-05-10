@@ -6,6 +6,10 @@ from zhihu.LangChain.basic_io import (
     messageholder_talk,
     load_prompt_from_file,
 )
+from zhihu.LangChain.outputparser import (
+    test_pydanticparser, test_pydanticparser_2,
+    test_auto_fixparser,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,3 +33,14 @@ def test_basic_io_messageholder():
 def test_basic_io_loadpromptfile():
     """ test load_prompt() """
     load_prompt_from_file()
+
+
+def test_outputparser():
+    """ test pydantic parser """
+    test_pydanticparser()
+    test_pydanticparser_2()
+
+
+def test_autofixparser():
+    """ test autofix parser """
+    test_auto_fixparser()
