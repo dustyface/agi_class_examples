@@ -1,12 +1,12 @@
 """
-Base class for RAG bot, RAG Bot for ERNIE, 
+Base class for RAG bot, RAG Bot for ERNIE,
 RAG Bot with CascadeDocParser, RAG Bot with CrossEncoder
 """
 from typing import Union
 from sentence_transformers import CrossEncoder
 from zhihu.RAG.common import parse_paragraph_from_pdf
 from zhihu.RAG.common import cascade_split_text
-from zhihu.RAG.vectordb.chrome_wrapper import ChromaDBWrapper
+from zhihu.RAG.vectordb.chroma_wrapper import ChromaDBWrapper
 from zhihu.RAG.vectordb.embeddings import get_embeddings
 from zhihu.common.api import Session
 from zhihu.RAG.prompt import build_prompt, PROMPT_TEMPLATE
@@ -32,10 +32,10 @@ class RAGBot:
 
         if docs is None:
             paras = self._parse_document(in_file)
-            self.chromadb_wrapper.add_documenet(paras)
+            self.chromadb_wrapper.add_document(paras)
         elif in_file is None:
             docs = [docs] if isinstance(docs, str) else docs
-            self.chromadb_wrapper.add_documenet(docs)
+            self.chromadb_wrapper.add_document(docs)
 
     # chromadb的search()返回的dict结构如下：
     # { ids: [[], []..., []], distances: [[0.289, 0.31xxx, ...],[],...[]]},
@@ -57,7 +57,7 @@ class RAGBot:
 
 
 class RAGBotWithCascadeDocParser(RAGBot):
-    """ 
+    """
     RAG Bot with CascadeDocParser
     CascadeDocParser used cascade_split_text to split the document
     """
