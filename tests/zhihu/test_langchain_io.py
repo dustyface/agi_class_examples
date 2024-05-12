@@ -5,6 +5,7 @@ from zhihu.LangChain.basic_io import (
     prompt_template_talk,
     messageholder_talk,
     load_prompt_from_file,
+    test_prompt_value,
 )
 from zhihu.LangChain.outputparser import (
     test_pydanticparser, test_pydanticparser_2,
@@ -12,6 +13,11 @@ from zhihu.LangChain.outputparser import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def test_prompt():
+    """ test prompt template class """
+    test_prompt_value()
 
 
 def test_basic_io_models():

@@ -5,6 +5,7 @@ from functools import wraps
 from typing import List
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
+# from langchain_community.embeddings import QianfanEmbeddingsEndpoint
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.vectorstores.chroma import Chroma
@@ -18,14 +19,15 @@ def timer(target_func):
     def func_wrapper(*args, use_timer=False, **kwargs):
         if use_timer is True:
             start_time = timeit.default_timer()
-            target_func(*args, **kwargs)
+            result = target_func(*args, **kwargs)
             end_time = timeit.default_timer()
             run_time = end_time - start_time
             log_msg = "function {name} executed in {run_time} seconds".format(**{
                 "name": f"{func_wrapper.__name__!r}", "run_time": run_time})
             logger.info(log_msg)
         else:
-            target_func(*args, **kwargs)
+            result = target_func(*args, **kwargs)
+        return result
 
     return func_wrapper
 
@@ -33,10 +35,10 @@ def timer(target_func):
 class DocumentHandler:
     """ Langchain PDF DocumentLoader & Text Splitter & Vectordb query """
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, embeddings_constructor=OpenAIEmbeddings):
         self.doc_loader = PyPDFLoader(file_path)
         self.doc_list: List[Document] = self.doc_loader.load_and_split()
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = embeddings_constructor()
         self.db = None
         self.text_splitter = None
 
@@ -73,5 +75,5 @@ class DocumentHandler:
         print("search_text=", search_text)
         retriever = self.db.as_retriever(search_kwargs={"k": k})
         docs = retriever.get_relevant_documents(search_text)
-        logger.info(docs)
+        # logger.info(docs)
         return docs

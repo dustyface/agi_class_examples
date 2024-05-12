@@ -46,6 +46,17 @@ chat_models = [
 ]
 
 
+def test_prompt_value():
+    """ test prompt value """
+    prompt = ChatPromptTemplate.from_template("你会{do_some_stuff}吗?")
+    prompt_value = prompt.invoke({
+        "do_some_stuff": "做北京炸酱面"
+    })
+    logger.info(type(prompt_value))
+    logger.info("prompt_value=%s", prompt_value.to_string())
+    logger.info("prompt_value=%s", prompt_value.to_messages())
+
+
 def simple_talk():
     """ simple talk """
     for m in chat_models:
