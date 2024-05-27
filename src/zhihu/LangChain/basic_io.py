@@ -61,7 +61,7 @@ def simple_talk():
     """ simple talk """
     for m in chat_models:
         response = m.invoke("你是谁?")
-        print(response.content)
+        logger.info(response.content)
 
 
 def multiround_talk():
@@ -70,11 +70,13 @@ def multiround_talk():
         SystemMessage(content="你是AGIClass的课程助理。"),
         HumanMessage(content="我是学员，我叫王卓然。"),
         AIMessage(content="欢迎！"),
-        HumanMessage(content="我是谁")
+        HumanMessage(content="我是谁?")
     ]
     for m in chat_models:
+        # 一次invoke，存在多个message, 可以记忆之前message的信息;
+        # 多次invoke, 不会记得之前invoke调用时发送给LLMs的信息;
         res = m.invoke(messages)
-    logger.info(res.content)
+        logger.info(res.content)
 
 
 def prompt_template_talk():

@@ -5,7 +5,10 @@ from zhihu.common.api import Session, client
 logger = logging.getLogger(__name__)
 
 def test_model_list():
-    """ List the model list in OpenAI """
+    """
+    List the model list in OpenAI
+    pytest tests/zhihu/test_api.py::test_model_list
+    """
     model_list = client.models.list()
     for m in model_list:
         logger.info("model=%s", m.id)
