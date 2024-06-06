@@ -1,11 +1,14 @@
 """ test for LCEL to implement function calling """
 from typing import Union
 from operator import itemgetter
+from langchain_core.globals import set_debug
 from langchain_core.tools import tool
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import Runnable, RunnablePassthrough, RunnableLambda
 from langchain.output_parsers import JsonOutputToolsParser
 from langchain_openai import ChatOpenAI
+
+set_debug(True)
 
 
 @tool

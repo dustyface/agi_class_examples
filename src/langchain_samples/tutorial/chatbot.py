@@ -51,7 +51,7 @@ def chatbot_chat(session_id="xyz"):
     logger.info("response for 1st question=%s", response.content)
 
     response = with_history_runnable.invoke({
-        "messages": [HumanMessage(content="what my name?")],
+        "messages": [HumanMessage(content="what's my name?")],
         "language": "English",
     }, config=config)
     logger.info("response for 2nd question=%s", response.content)

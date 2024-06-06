@@ -4,7 +4,7 @@ import pytest
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_samples.tutorial.translator import simple_translate_with_chain
 from langchain_samples.tutorial.chatbot import chatbot_chat, limited_length_chat
-from langchain_samples.tutorial.agent import stream_tokens
+from langchain_samples.tutorial.agent import stream_tokens, invoke_with_tools
 from langchain_samples.tutorial.vectorstore import retriever1 as retriever, rag_chain
 
 logger = logging.getLogger(__name__)
@@ -46,13 +46,23 @@ def test_limit_length_chat():
 @pytest.mark.asyncio
 async def test_agent_stream_tokens():
     """
-    pytest tests/LangChain/test_tut.py::test_agent_stream_tokens
+    pytest tests/langchain/test_tut.py::test_agent_stream_tokens
     """
     await stream_tokens()
 
 
+def test_invoke_with_tool():
+    """
+    pytest tests/langchain/test_tut.py::test_invoke_with_tool
+
+    model回复的是function calling的第一步，返回func call的定义，执行结果是由用户自己调用
+    """
+    invoke_with_tools("what is the weather in SF")
+    invoke_with_tools("pls introduce how to use langsmith")
+
+
 def test_rag_chain():
     """
-    pytest tests/LangChain/test_tut.py::test_rag_chain
+    pytest tests/langchain/test_tut.py::test_rag_chain
     """
     logger.info(rag_chain(retriever).content)

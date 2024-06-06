@@ -113,7 +113,7 @@ def messageholder_talk():
     human_msg = HumanMessage(content="Who is Elon Musk?")
     ai_msg = AIMessage(
         content="Elon Musk is a billionaire entrepreneur, inventor, and industrial designer")
-    # MessagePlaceholder可以将多个Message对象，插入到该placeholder插桩的位置
+    # MessagesPlaceholder可以将多个Message对象，插入到该placeholder插桩的位置
     messages = chat_prompt.format_prompt(
         # conversion的位置，可以被替换为多个message
         conversation=[human_msg, ai_msg], language="日文"

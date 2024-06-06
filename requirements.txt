@@ -16,5 +16,8 @@ langgraph
 langserve
 langchain_openai
 langchain_chroma
+langchainhub
 faiss-cpu
 anyio
+pytest-asyncio
+google-search-results

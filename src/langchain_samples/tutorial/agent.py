@@ -38,7 +38,7 @@ tools = [tavily_search, retriever_tool]
 model = ChatOpenAI()
 
 
-def invoke_with_tools():
+def invoke_with_tools(query):
     """ invoke with tools """
     model_with_tools = model.bind_tools(tools)
     # res = model_with_tools.invoke([HumanMessage(content="Hi")])
@@ -49,13 +49,16 @@ def invoke_with_tools():
     # 默认的gpt-3.5-turbo也可以完成function calling
     # 这是否是langchain加入的能力，即针对function calling的大模型的限制被放宽了
     res = model_with_tools.invoke(
-        [HumanMessage(content="What's the weather in SF?")])
+        [HumanMessage(content=query)])
     logger.info("res.content=%s", res.content)
     logger.info("res.tool_calls=%s", res.tool_calls)
 
 
 async def stream_tokens():
-    """ create agent using langgraph, stream tokens """
+    """
+    create agent using langgraph, stream tokens
+    这个agent可以支持2类查询，查询天气，查询langsmith的内容，都是仅依靠用户query即可自动执行
+    """
     agent = chat_agent_executor.create_tool_calling_executor(
         model, tools)
     # 注意, .astream_events only support with python 3.11 or higher
