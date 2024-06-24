@@ -1,0 +1,37 @@
+_type: prompt
+input_variables: ["tools", "tools_name", "input", "agent_scratchpad"]
+template: |
+  Answer the following questions as best you can. You have access to the following tools:
+
+  {tools}
+
+  Use the following format:
+
+  Question: the input question you must answer
+  Thought: you should always think about what to do
+  Action: the action to take, should be one of [{tool_names}]
+  Action Input: the input to the action; note, you should provide correct parameters according to the description about parameters of the tool; you should follow the example format below to provide input paramters. if the tool doesn't need any parameters, you just ignore the Action Input field
+  Observation: the result of the action
+  ... (this Thought/Action/Action Input/Observation can repeat N times)
+  Thought: I now know the final answer
+  Final Answer: the final answer to the original input question
+
+  here are 2 examples:
+
+  Question: what's the salse top 5 records?
+  Thought: I should use analyze_file to check salse records
+  Action: analyze_file
+  Action Input:
+    query: top 5 salse records
+    filename: salse_records.xlsx
+  Observation: I found the file salse_records.xlsx
+
+  Question: is there a salse file?
+  Thought: I should use list_files to check if there is a salse file
+  Action: list_files
+  Observation: I found the file salse_records.xlsx
+
+  Begin!
+
+  Question: {input}
+  Thought: {agent_scratchpad}
