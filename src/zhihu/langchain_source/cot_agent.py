@@ -57,7 +57,7 @@ class ReasonOutputParser(AgentOutputParser):
         args: Optional[Dict[str, Any]
                        ] = action.args if text is not None else "No args"
         log: str = text if text is not None else ""
-        if name == "FINISH":
+        if name.upper() == "FINISH":
             return AgentFinish(args, log)
         elif name is not None:
             return AgentAction(name, args, log)
@@ -94,15 +94,15 @@ def create_reason_agent(llm, tools):
         | llm
         | ReasonOutputParser()
     )
-    return agent
+    executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    return executor
 
 
 async def use_create_reason_agent(query: str):
     """ test create reason agent """
     llm = ChatZhipuAI()
     tools = [ask_neighber, finish]
-    agent = create_reason_agent(llm, tools)
-    executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    executor = create_reason_agent(llm, tools)
     async for e in executor.astream_events({"input": query}, version="v1"):
         if e["event"] in ["on_chat_model_end", "on_tool_end"]:
             if "input" in e["data"]:

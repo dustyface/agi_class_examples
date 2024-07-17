@@ -20,6 +20,7 @@ from langchain_zhipu import ChatZhipuAI
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from zhihu.langchain_source.custom_openai_agent import create_openai_agent_executor
 from zhihu.langchain_source.react_agent import create_custom_react_executor
+from zhihu.langchain_source.cot_agent import create_reason_agent
 # from zhihu.langchain_source.zhipu_model import MiniZhipuAI
 
 
@@ -310,3 +311,9 @@ async def use_openai_executor(query: str):
     """ 使用openai agent """
     glm_openai_executor = create_openai_agent_executor(llm, tools)
     await use_executor(glm_openai_executor, query)
+
+
+async def use_cot_executor(query: str):
+    """ 使用较复杂的cot prompt的agent """
+    cot_executor = create_reason_agent(llm, tools)
+    await use_executor(cot_executor, query)

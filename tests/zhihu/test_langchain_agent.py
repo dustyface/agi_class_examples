@@ -21,7 +21,7 @@ from zhihu.langchain_source.react_agent import use_neighber_react_agent
 from zhihu.langchain_source.cot_agent import use_create_reason_agent
 from zhihu.langchain_source.custom_auto_gpt import (
     ask_document, inspect_excel, load_excel_analyzer_prompt, excel_analyse,
-    use_openai_executor, use_react_executor
+    use_openai_executor, use_react_executor, use_cot_executor
 )
 from zhihu.langchain_source.zhipu_model import MiniZhipuAI
 
@@ -213,3 +213,13 @@ async def test_analyze_excel_pdf_react_agent():
     pytest tests/zhihu/test_langchain_agent.py::test_analyze_excel_pdf_react_agent
     """
     await use_react_executor("供应商达标的业绩要求是什么", model_tag="openai")
+
+
+@pytest.mark.asyncio
+async def test_cot_agent():
+    """
+    pytest tests/zhihu/test_langchain_agent.py::test_cot_agent
+    """
+    await use_cot_executor("供应商达标的标准是什么？")
+    # 下一条无法分析成功
+    await use_cot_executor("9月份有哪些供应商达标?")

@@ -17,6 +17,7 @@ langserve
 langchain_openai
 langchain_chroma
 langchainhub
+langfuse
 grandalf[all]
 faiss-cpu
 anyio
