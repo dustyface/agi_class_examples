@@ -1,5 +1,5 @@
 
-# Zhihu Training Campaign Examples
+# Zhihu AGIClass Campaign Examples
 
 - 这个project是知乎AI训练营的examples。对课件中的例子进行了重构, 全部改为基于pytest unittest的方式进行测试
 
