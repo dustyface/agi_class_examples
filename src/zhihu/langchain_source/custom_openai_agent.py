@@ -42,9 +42,7 @@ additional_kwargs={action.message_log[0].additional_kwargs!r}{BgColor.ENDC}""")
 def create_custom_openai_tools_agent(
     llm: BaseLanguageModel,
     tools: Sequence[BaseTool],
-    prompt: ChatPromptTemplate
-
-
+    prompt: ChatPromptTemplate,
 ) -> Runnable:
     """ Create a openai tools agent of myself """
     missing_vars = {"agent_scratchpad"}.difference(

@@ -60,7 +60,9 @@ def llm_exec_tools(query: str):
 
     def call_tool(tool_invocation: dict) -> Union[str, Runnable]:
         """ 根据model选择的tool, 动态创建LCEL Runnable """
+
         func_tool = tool_map[tool_invocation["type"]]
+
         # 返回RunnableAssign(RunnableParallel(kwargs))
         # `output=itemgetter("args") | func_tool` 被转成了RunnableParallel
         # 它实际代表着对function call的执行

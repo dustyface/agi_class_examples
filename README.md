@@ -36,6 +36,4 @@ LANGFUSE_SECRET_KEY="LangFuse SK"
 LANGFUSE_PUBLIC_KEY="LangFuse PK"
 LANGFUSE_HOST="LangFuse host url"   # https://cloud.langfuse.com
 
-
-
 ```

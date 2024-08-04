@@ -25,3 +25,4 @@ pytest-asyncio
 google-search-results
 colorama
 pandas
+cn_clip
