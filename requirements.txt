@@ -26,3 +26,4 @@ google-search-results
 colorama
 pandas
 cn_clip
+tavily-python
